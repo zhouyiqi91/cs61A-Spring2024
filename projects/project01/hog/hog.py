@@ -64,6 +64,9 @@ def take_turn(num_rolls, player_score, opponent_score, dice=six_sided):
     assert num_rolls <= 10, 'Cannot roll more than 10 dice.'
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    if num_rolls == 0:
+        return boar_brawl(player_score, opponent_score)
+    return roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -89,13 +92,19 @@ def num_factors(n):
     """Return the number of factors of N, including 1 and N itself."""
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    return len([x for x in range(1, n+1) if n % x == 0])
+        
     # END PROBLEM 4
 
 def sus_points(score):
     """Return the new score of a player taking into account the Sus Fuss rule."""
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
-    # END PROBLEM 4
+    if num_factors(score) not in (3,4): return score
+    score += 1
+    while not is_prime(score): score += 1
+    return score
+    # END PROBLEM 4 
 
 def sus_update(num_rolls, player_score, opponent_score, dice=six_sided):
     """Return the total score of a player who starts their turn with
@@ -103,6 +112,8 @@ def sus_update(num_rolls, player_score, opponent_score, dice=six_sided):
     """
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    score = simple_update(num_rolls, player_score, opponent_score, dice)
+    return sus_points(score)
     # END PROBLEM 4
 
 
@@ -111,6 +122,10 @@ def always_roll_5(score, opponent_score):
     the opponent's score.
     """
     return 5
+
+def _play(strategy, update, score, oppoent_score, dice):
+    num_rolls = strategy(score, oppoent_score)
+    return update(num_rolls, score, oppoent_score, dice)
 
 
 def play(strategy0, strategy1, update,
@@ -142,6 +157,23 @@ def play(strategy0, strategy1, update,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    cur_player = 0
+    while score0 < goal and score1 < goal:
+        if cur_player == 0:
+            strategy = strategy0
+            score = score0
+            oppoent_score = score1
+        else:
+            strategy = strategy1
+            score = score1
+            oppoent_score = score0
+        new_score = _play(strategy, update, score, oppoent_score, dice)
+        if cur_player == 0: 
+            score0 = new_score
+        else: 
+            score1 = new_score
+        cur_player = 1 - cur_player
+
     # END PROBLEM 5
     return score0, score1
 
@@ -167,6 +199,7 @@ def always_roll(n):
     assert n >= 0 and n <= 10
     # BEGIN PROBLEM 6
     "*** YOUR CODE HERE ***"
+    return lambda score,oppoent_score: n
     # END PROBLEM 6
 
 
@@ -198,7 +231,14 @@ def is_always_roll(strategy, goal=GOAL):
     """
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
-    # END PROBLEM 7
+    num_roll = strategy(0,0)
+    for score in range(goal):
+        for oppoent_score in range(goal):
+            if strategy(score, oppoent_score) != num_roll:
+                return False
+    return True
+
+    # END PROBLEM 7 
 
 
 def make_averaged(original_function, samples_count=1000):
@@ -214,6 +254,13 @@ def make_averaged(original_function, samples_count=1000):
     """
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    def func(*args):
+        s = 0
+        for _ in range(samples_count):
+            s += original_function(*args)
+        return s/samples_count
+    return func
+
     # END PROBLEM 8
 
 
@@ -228,6 +275,15 @@ def max_scoring_num_rolls(dice=six_sided, samples_count=1000):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    res = 0
+    max_score = -1
+    averaged_dice = make_averaged(roll_dice, samples_count)
+    for i in range(1, 11):
+        cur_score = averaged_dice(i, dice)
+        if cur_score > max_score:
+            max_score = cur_score
+            res = i
+    return res
     # END PROBLEM 9
 
 
@@ -272,6 +328,7 @@ def boar_strategy(score, opponent_score, threshold=11, num_rolls=6):
     points, and returns NUM_ROLLS otherwise. Ignore score and Sus Fuss.
     """
     # BEGIN PROBLEM 10
+    if boar_brawl(score, opponent_score) >= threshold: return 0
     return num_rolls  # Remove this line once implemented.
     # END PROBLEM 10
 
@@ -279,6 +336,8 @@ def boar_strategy(score, opponent_score, threshold=11, num_rolls=6):
 def sus_strategy(score, opponent_score, threshold=11, num_rolls=6):
     """This strategy returns 0 dice when your score would increase by at least threshold."""
     # BEGIN PROBLEM 11
+    if sus_points(boar_brawl(score,opponent_score)+score) >= score + threshold:
+        return 0
     return num_rolls  # Remove this line once implemented.
     # END PROBLEM 11
 
