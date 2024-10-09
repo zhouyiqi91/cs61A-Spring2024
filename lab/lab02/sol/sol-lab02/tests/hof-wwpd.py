@@ -3,9 +3,29 @@ test = {
   'points': 0,
   'suites': [
     {
+      'type': 'wwpp',
       'cases': [
+        # {
+        #   'code': """
+        #   >>> # If Python displays <function...>, type Function, if it errors type Error, if it displays nothing type Nothing
+        #   >>> def even(f):
+        #   ...     def odd(x):
+        #   ...         if x < 0:
+        #   ...             return f(-x)
+        #   ...         return f(x)
+        #   ...     return odd
+        #   >>> steven = lambda x: x
+        #   >>> stewart = even(steven)
+        #   >>> stewart
+        #   Function
+        #   >>> stewart(61)
+        #   61
+        #   >>> stewart(-4)
+        #   4
+        #   """,
+        # },
         {
-          'code': r"""
+          'code': """
           >>> # If Python displays <function...>, type Function, if it errors type Error, if it displays nothing type Nothing
           >>> def cake():
           ...    print('beets')
@@ -40,13 +60,8 @@ test = {
           >>> snake(10, 20)
           30
           """,
-          'hidden': False,
-          'locked': False,
-          'multiline': False
         }
-      ],
-      'scored': False,
-      'type': 'wwpp'
+      ]
     }
   ]
 }

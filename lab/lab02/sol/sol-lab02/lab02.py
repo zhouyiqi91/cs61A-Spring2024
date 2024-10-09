@@ -13,8 +13,12 @@ def composite_identity(f, g):
     >>> b1(4)                            # (4 + 1) ** 2 != 4 ** 2 + 1
     False
     """
-    "*** YOUR CODE HERE ***"
-    return lambda x: f(g(x))==g(f(x))
+    return lambda x: f(g(x)) == g(f(x))
+
+    # Alternate solution:
+    def h(x):
+        return f(g(x)) == g(f(x))
+    return h
 
 
 def sum_digits(y):
@@ -60,15 +64,15 @@ def count_cond(condition):
     >>> count_primes(20)   # 2, 3, 5, 7, 11, 13, 17, 19
     8
     """
-    "*** YOUR CODE HERE ***"
-    def func(n):
-        res = 0
-        for i in range(1, n+1):
+    def counter(n):
+        i = 1
+        count = 0
+        while i <= n:
             if condition(n, i):
-                res += 1
-        return res
-    return func
-
+                count += 1
+            i += 1
+        return count
+    return counter
 
 
 def multiple(a, b):
@@ -79,9 +83,11 @@ def multiple(a, b):
     >>> multiple(14, 21)
     42
     """
-    "*** YOUR CODE HERE ***"
-    from math import gcd
-    return a*b//gcd(a,b)
+    n = 1
+    while True:
+        if n % a == 0 and n % b == 0:
+            return n
+        n += 1
 
 
 
@@ -111,14 +117,27 @@ def cycle(f1, f2, f3):
     >>> do_two_cycles(1)
     19
     """
-    "*** YOUR CODE HERE ***"
-    c = [f1,f2,f3]
     def g(n):
         def h(x):
-            res = x
-            for i in range(n):
-                res = c[i%3](res)
-            return res
+            i = 0
+            while i < n:
+                if i % 3 == 0:
+                    x = f1(x)
+                elif i % 3 == 1:
+                    x = f2(x)
+                else:
+                    x = f3(x)
+                i += 1
+            return x
+        return h
+    return g
+
+    # Alternative recursive solution
+    def g(n):
+        def h(x):
+            if n == 0:
+                return x
+            return cycle(f2, f3, f1)(n - 1)(f1(x))
         return h
     return g
 
