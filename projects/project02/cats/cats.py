@@ -117,7 +117,7 @@ def wpm(typed, elapsed) -> float:
 # Phase 2A #
 ############
 
-from typing import Callable
+from typing import Any, Callable
 
 def autocorrect(
         typed_word: str, 
@@ -289,7 +289,10 @@ def report_progress(
     # END PROBLEM 8
 
 
-def time_per_word(words:list[str], timestamps_per_player: list[list[int]]):
+def time_per_word(
+        words:list[str], 
+        timestamps_per_player: list[list[int]]
+        ) :
     """Given timing data, return a match data abstraction, which contains a
     list of words and the amount of time each player took to type each word.
 
@@ -308,6 +311,14 @@ def time_per_word(words:list[str], timestamps_per_player: list[list[int]]):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    from itertools import pairwise
+    times = [[y-x for x, y in pairwise(tp)] for tp in timestamps_per_player]
+    """
+    times = []
+    for tp in timestamps_per_player:
+        times.append([y-x for x,y in pairwise(tp)])
+    """
+    return match(words, times)
     
     # END PROBLEM 9
 
@@ -331,10 +342,46 @@ def fastest_words(match):
     word_indices = range(len(get_all_words(match)))    # contains an *index* for each word
     # BEGIN PROBLEM 10
     "*** YOUR CODE HERE ***"
+    """chatgpt first
+    fastest = [[] for _ in player_indices]
+
+    # Loop over each word index
+    for word_index in word_indices:
+        # Assume the first player is the fastest initially
+        fastest_player = 0
+        min_time = time(match, fastest_player, word_index)
+
+        # Check times for other players
+        for player_index in player_indices:
+            player_time = time(match, player_index, word_index)
+            if player_time < min_time:
+                fastest_player = player_index
+                min_time = player_time
+
+        # Append the word to the fastest player's list
+        fastest[fastest_player].append(get_word(match, word_index))
+
+    return fastest
+    """
+
+    # chatgpt list comprehension prompt
+    # Initialize the result list for each player
+    fastest = [[] for _ in player_indices]
+
+    # Using a list comprehension to determine the fastest player for each word
+    [
+        fastest[
+            min(player_indices, key=lambda player_index: time(match, player_index, word_index))
+        ].append(get_word(match, word_index))
+        for word_index in word_indices
+    ]
+
+    return fastest
+
     # END PROBLEM 10
 
 
-def match(words, times):
+def match(words, times: list[list[int]]):
     """A data abstraction containing all words typed and their times.
 
     Arguments:
